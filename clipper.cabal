@@ -1,0 +1,27 @@
+Name:                clipper
+Version:             0.0.1
+Synopsis:            Haskell API to clipper (2d polygon union/intersection/xor/clipping API)
+-- Description:         
+Homepage:            https://github.com/chetant/clipper
+License:             BSD3
+License-file:        LICENSE
+Author:              Chetan Taralekar
+Maintainer:          chetant@gmail.com
+Copyright:           (c) Chetan Taralekar 2011, 2012
+Category:            Algebra
+
+Build-type:          Simple
+-- Extra-source-files:  
+Cabal-version:       >=1.2
+Library
+  -- Modules exported by the library.
+  -- Exposed-modules:     
+  
+  -- Packages needed in order to build this package.
+  -- Build-depends:       
+  
+  -- Modules not exported by this package.
+  -- Other-modules:       
+  
+  -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
+  -- Build-tools:         
