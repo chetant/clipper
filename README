@@ -1,0 +1,6 @@
+clipper
+=======
+
+Haskell bindings for clipper (a C++/C#/Delphi API for 2d polygon algerbric ops)
+
+(c) Chetan Taralekar 2011, 2012
