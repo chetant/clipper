@@ -31,8 +31,6 @@
 #include <cstring>
 #include <cstdlib>
 
-namespace clipper {
-
 enum ClipType { ctIntersection, ctUnion, ctDifference, ctXor };
 enum PolyType { ptSubject, ptClip };
 enum PolyFillType { pftEvenOdd, pftNonZero };
@@ -58,6 +56,15 @@ typedef std::vector< ExPolygon > ExPolygons;
 bool IsClockwise(const Polygon &poly, bool UseFullInt64Range = true);
 double Area(const Polygon &poly, bool UseFullInt64Range = true);
 bool OffsetPolygons(const Polygons &in_pgs, Polygons &out_pgs, const float &delta);
+
+extern "C" {
+
+  typedef void * polygon;
+  typedef void * polygons;
+
+  polygon polygon_new(int numPoints);
+  void polygon_free(polygon poly);
+}
 
 //used internally ...
 enum EdgeSide { esLeft, esRight };
@@ -267,7 +274,6 @@ class clipperException : public std::exception
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 
-} //clipper namespace
 #endif //clipper_hpp
 
 

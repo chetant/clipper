@@ -46,8 +46,6 @@ namespace std
 }
 #endif
 
-namespace clipper {
-
 static double const horizontal = -3.4E+38;
 static double const pi = 3.14159265359;
 enum Direction { dRightToLeft, dLeftToRight };
@@ -2963,6 +2961,17 @@ bool OffsetPolygons(const Polygons &in_pgs, Polygons &out_pgs, const float &delt
 }
 //------------------------------------------------------------------------------
 
-} //namespace clipper
+extern "C" {
+  polygon polygon_new(int numPoints)
+  {
+    if(numPoints > 0)
+      return new Polygon(numPoints);
+    else
+      return new Polygon();
+  }
 
-
+  void polygon_free(polygon poly)
+  {
+    delete (Polygon *) poly;
+  }
+}
