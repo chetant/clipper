@@ -31,9 +31,9 @@
 #include <cstring>
 #include <cstdlib>
 
-enum ClipType { ctIntersection, ctUnion, ctDifference, ctXor };
-enum PolyType { ptSubject, ptClip };
-enum PolyFillType { pftEvenOdd, pftNonZero };
+enum ClipType { ctIntersection=0x1, ctUnion=0x2, ctDifference=0x3, ctXor=0x4 };
+enum PolyType { ptSubject=0x1, ptClip=0x2 };
+enum PolyFillType { pftEvenOdd=0x1, pftNonZero=0x2 };
 
 typedef signed long long long64;
 typedef unsigned long long ulong64;
@@ -61,9 +61,26 @@ extern "C" {
 
   typedef void * polygon;
   typedef void * polygons;
+  typedef void * expolygon;
+  typedef void * expolygons;
+  typedef void * clipper;
 
   polygon polygon_new(int numPoints);
+  void polygon_addPoint(polygon poly, long64 x, long64 y);
   void polygon_free(polygon poly);
+
+  int polygon_isClockwise(polygon poly, int useFullInt64Range);
+  double polygon_getArea(polygon poly, int useFullInt64Range);
+
+  polygons polygons_new(int numPolys);
+  void polygons_addPoly(polygons polys, polygon poly);
+  void polygons_free(polygons poly);
+
+  clipper clipper_new();
+  void clipper_addPolygon(clipper c, polygon poly, PolyType ptype);
+  void clipper_addPolygons(clipper c, polygons poly, PolyType ptype);
+  void clipper_executePoly(clipper c, ClipType ctype, polygons soln);
+  void clipper_free(clipper c);
 }
 
 //used internally ...

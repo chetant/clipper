@@ -2962,6 +2962,7 @@ bool OffsetPolygons(const Polygons &in_pgs, Polygons &out_pgs, const float &delt
 //------------------------------------------------------------------------------
 
 extern "C" {
+  //****************** POLYGON
   polygon polygon_new(int numPoints)
   {
     if(numPoints > 0)
@@ -2970,8 +2971,95 @@ extern "C" {
       return new Polygon();
   }
 
+  void polygon_addPoint(polygon poly, long64 x, long64 y)
+  {
+    IntPoint pt(x, y);
+    ((Polygon *)poly)->push_back(pt);
+  }
+
   void polygon_free(polygon poly)
   {
     delete (Polygon *) poly;
+  }
+
+  int polygon_isClockwise(polygon poly, int useFullInt64Range)
+  {
+    return IsClockwise(*((Polygon *) poly), (useFullInt64Range == 0)?false:true)?1:0;
+  }
+
+  double polygon_getArea(polygon poly, int useFullInt64Range)
+  {
+    return Area(*((Polygon *) poly), (useFullInt64Range == 0)?false:true);
+  } 
+
+  //****************** POLYGONS
+  polygons polygons_new(int numPolys)
+  {
+    if(numPolys > 0)
+      return new Polygons(numPolys);
+    else
+      return new Polygons();
+  }
+
+  void polygons_addPoly(polygons polys, polygon poly)
+  {
+    ((Polygons *)polys)->push_back(*((Polygon *)poly));
+  }
+
+  void polygons_free(polygons poly)
+  {
+    delete (Polygons *) poly;
+  }
+
+
+  //****************** EXPOLYGON
+  // expolygon expolygon_new(int numPoints)
+  // {
+  //   if(numPoints > 0)
+  //     return new ExPolygons(numPoints);
+  //   else
+  //     return new ExPolygons();
+  // }
+
+  // void expolygon_addPoint(expolygon poly, long64 x, long64 y)
+  // {
+  //   IntPoint pt(x, y);
+  //   ((ExPolygon *)poly)->push_back(pt);
+  // }
+
+  // void expolygon_free(expolygon poly)
+  // {
+  //   delete (ExPolygon *) poly;
+  // }
+
+  //****************** CLIPPER
+  clipper clipper_new()
+  {
+    return new Clipper();
+  }
+
+  void clipper_addPolygon(clipper c, polygon poly, PolyType ptype)
+  {
+    ((Clipper *) c)->AddPolygon(*((Polygon *) poly), ptype);
+  }
+
+  void clipper_addPolygons(clipper c, polygons poly, PolyType ptype)
+  {
+    ((Clipper *) c)->AddPolygons(*((Polygons *) poly), ptype);
+  }
+
+  void clipper_executePoly(clipper c, ClipType ctype, polygons soln)
+  {
+    ((Clipper *) c)->Execute(ctype, *((Polygons *) soln));
+  }
+
+  // void clipper_executeExPoly(clipper c, ClipType ctype, polygons soln)
+  // {
+  //   ((Clipper *) c)->AddPolygons(*((ExPolygons *) poly));
+  // }
+
+  void clipper_free(clipper c)
+  {
+    delete ((Clipper *) c);
   }
 }

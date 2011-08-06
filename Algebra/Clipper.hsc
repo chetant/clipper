@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP, ForeignFunctionInterface, EmptyDataDecl #-}
+{-# LANGUAGE CPP, ForeignFunctionInterface, EmptyDataDecls #-}
 module Algebra.Clipper where
 
 import Foreign
@@ -9,24 +9,16 @@ import Data.Word(Word64)
 #include <clipper.hpp>
 
 -- enum ClipType { ctIntersection, ctUnion, ctDifference, ctXor };
-#{enum ClipType, ClipType
- , ctIntersection
- , ctUnion
- , ctDifference
- , ctXor
- }
+newtype ClipType = ClipType Int
+#enum ClipType, ClipType, ctIntersection = ctIntersection, ctUnion = ctUnion, ctDifference = ctDifference, ctXor = ctXor
 
 -- enum PolyType { ptSubject, ptClip };
-#{enum PolyType, PolyType
- , ptSubject
- , ptClip
- }
+newtype PolyType = PolyType Int
+#enum PolyType, PolyType, ptSubject = ptSubject, ptClip = ptClip
 
 -- enum PolyFillType { pftEvenOdd, pftNonZero };
-#{enum PolyFillType, PolyFillType
- , pftEvenOdd
- , pftNonZero
- }
+newtype PolyFillType = PolyFillType Int
+#enum PolyFillType, PolyFillType, pftEvenOdd = pftEvenOdd, pftNonZero = pftNonZero
 
 -- typedef signed long long long64;
 -- typedef unsigned long long ulong64;
@@ -39,8 +31,8 @@ import Data.Word(Word64)
 
 data IntPoint = IntPoint
     {
-      pointX :: Int64
-    , pointY :: Int64
+      pointX :: #{type long64}
+    , pointY :: #{type long64}
     }
 
 -- typedef std::vector< IntPoint > Polygon;
@@ -58,24 +50,52 @@ type PolygonsPtr = Ptr Polygons
 -- };
 -- typedef std::vector< ExPolygon > ExPolygons;
 
-data ExPolygons
+data ExPolygon
 type ExPolygonPtr = Ptr ExPolygon
 
--- bool IsClockwise(const Polygon &poly, bool UseFullInt64Range = true);
--- double Area(const Polygon &poly, bool UseFullInt64Range = true);
--- bool OffsetPolygons(const Polygons &in_pgs, Polygons &out_pgs, const float &delta);
+data ExPolygons
+type ExPolygonsPtr = Ptr ExPolygons
 
 -- extern "C" {
-
---   typedef void * polygon;
---   typedef void * polygons;
+-- typedef void * polygon;
+-- typedef void * polygons;
 
 --   polygon polygon_new(int numPoints);
 foreign import ccall "static clipper.hpp polygon_new"
-        newPolygon :: IO PolygonPtr
+        polygonNew :: #{type int} -> IO PolygonPtr
+
+--   void polygon_addPoint(polygon poly, long64 x, long64 y)
+foreign import ccall "static clipper.hpp polygon_new"
+        polygonAddPoint :: PolygonPtr -> #{type long64} -> #{type long64} -> IO ()
 
 --   void polygon_free(polygon poly);
-foreign import ccall "static clipper.hpp polygon_new"
-        freePolygon :: PolygonPtr -> IO ()
+foreign import ccall "static clipper.hpp polygon_free"
+        polygonFree :: PolygonPtr -> IO ()
+
+--   int polygon_isClockwise(polygon poly, int useFullInt64Range)
+foreign import ccall "static clipper.hpp polygon_isClockwise"
+        polygonIsClockwise :: PolygonPtr -> #{type int} -> IO #{type int}
+
+--   double polygon_getArea(polygon poly,, int useFullInt64Range)
+foreign import ccall "static clipper.hpp polygon_getArea"
+        polygonArea :: PolygonPtr -> #{type int} -> IO #{type double}
+
+--   polygons polygons_new(int numPolys);
+foreign import ccall "static clipper.hpp polygons_new"
+        polygonsNew :: #{type int}  -> IO PolygonsPtr
+
+--   void polygons_addPoly(polygons polys, polygon poly);
+foreign import ccall "static clipper.hpp polygons_addPoly"
+        polygonsAddPoly :: PolygonsPtr -> PolygonPtr -> IO ()
+
+--   void polygons_free(polygons poly);
+foreign import ccall "static clipper.hpp polygons_new"
+        polygonsFree :: PolygonsPtr -> IO ()
+
+--   clipper clipper_new();
+--   void clipper_addPolygon(clipper c, polygon poly, PolyType ptype);
+--   void clipper_addPolygons(clipper c, polygons poly, PolyType ptype);
+--   void clipper_executePoly(clipper c, ClipType ctype, polygons soln);
+--   void clipper_free(clipper c);
 
 -- }
