@@ -37,6 +37,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <cstdlib>
+#include <stdio.h>
 
 //Workaround for older compilers that don't have std::abs
 #if (__GNUC__ == 2 && __GNUC_MINOR__ <= 97) || (defined(_MSC_VER) && _MSC_VER <= 1310)
@@ -2965,20 +2966,50 @@ extern "C" {
   //****************** POLYGON
   polygon polygon_new(int numPoints)
   {
+    // Polygon * p;
+    // if(numPoints > 0)
+    //   p = new Polygon(numPoints);
+    // else
+    //   p = new Polygon();
+    // printf("NEW Poly:0x%X\n", p);
+    // return p;
     if(numPoints > 0)
       return new Polygon(numPoints);
     else
       return new Polygon();
   }
 
+  void polygon_clear(polygon poly)
+  {
+    // printf("CLEAR Poly:0x%X\n", poly);
+    ((Polygon *) poly)->clear();
+  }
+
+  int polygon_size(polygon poly)
+  {
+    return ((Polygon *) poly)->size();
+  }
+
   void polygon_addPoint(polygon poly, long64 x, long64 y)
   {
+    // printf("ADD Point Poly:0x%X, (%lld, %lld)\n", poly, x, y);
     IntPoint pt(x, y);
     ((Polygon *)poly)->push_back(pt);
   }
 
+  long64 polygon_getPointX(polygon poly, int i)
+  {
+    return ((Polygon *)poly)->at(i).X;
+  }
+
+  long64 polygon_getPointY(polygon poly, int i)
+  {
+    return ((Polygon *)poly)->at(i).Y;
+  }
+
   void polygon_free(polygon poly)
   {
+    // printf("FREE Poly:0x%X\n", poly);
     delete (Polygon *) poly;
   }
 
@@ -2995,19 +3026,47 @@ extern "C" {
   //****************** POLYGONS
   polygons polygons_new(int numPolys)
   {
+    // Polygons * ps;
+    // if(numPolys > 0)
+    //   ps = new Polygons(numPolys);
+    // else
+    //   ps = new Polygons();
+    // printf("NEW Polygons:0x%X\n", ps);
+    // return ps;
     if(numPolys > 0)
       return new Polygons(numPolys);
     else
       return new Polygons();
   }
 
+  void polygons_clear(polygons poly)
+  {
+    // printf("CLEAR Polys: 0x%X\n", poly);
+    ((Polygons *) poly)->clear();
+  }
+
+  int polygons_size(polygons poly)
+  {
+    return ((Polygons *) poly)->size();
+  }
+
+  polygon polygons_getPoly(polygons polys, int i)
+  {
+    // Polygon * p = &(((Polygons *)polys)->at(i));
+    // printf("GETPoly Polys: 0x%X, Poly:0x%X(%d)\n", polys, p, p->size());
+    // return p;
+    return &(((Polygons *)polys)->at(i));
+  }
+
   void polygons_addPoly(polygons polys, polygon poly)
   {
     ((Polygons *)polys)->push_back(*((Polygon *)poly));
+    // printf("ADDPoly Polys: 0x%X, poly:0x%X(%d), size:%d\n", polys, poly, ((Polygon *)poly)->size(), ((Polygons *)polys)->size());
   }
 
   void polygons_free(polygons poly)
   {
+    // printf("FREE Polys: 0x%X\n", poly);
     delete (Polygons *) poly;
   }
 
@@ -3035,6 +3094,7 @@ extern "C" {
   //****************** CLIPPER
   clipper clipper_new()
   {
+    // printf("NEW Clipper\n");
     return new Clipper();
   }
 
@@ -3045,11 +3105,13 @@ extern "C" {
 
   void clipper_addPolygons(clipper c, polygons poly, PolyType ptype)
   {
+    // printf("AddPolygons CLipper:0x%X, Poly:0x%X, Size:%d\n", c, poly, ((Polygons *) poly)->size());
     ((Clipper *) c)->AddPolygons(*((Polygons *) poly), ptype);
   }
 
   void clipper_executePoly(clipper c, ClipType ctype, polygons soln)
   {
+    // printf("Execute CLipper:0x%X, Soln:0x%X\n", c, soln);
     ((Clipper *) c)->Execute(ctype, *((Polygons *) soln));
   }
 
@@ -3060,6 +3122,7 @@ extern "C" {
 
   void clipper_free(clipper c)
   {
+    // printf("FREE Clipper\n");
     delete ((Clipper *) c);
   }
 }

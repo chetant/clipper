@@ -1,7 +1,7 @@
 Name:                clipper
 Version:             0.0.1
 Synopsis:            Haskell API to clipper (2d polygon union/intersection/xor/clipping API)
--- Description:         
+Description:         NOTE: To compile, please specify the C++ compiler by passing --with-gcc=<CXX>
 Homepage:            https://github.com/chetant/clipper
 License:             BSD3
 License-file:        LICENSE
@@ -28,5 +28,5 @@ Library
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   Build-tools:       hsc2hs
   Include-dirs:      cbits
-  C-sources:          cbits/clipper.cpp
+  C-sources:         cbits/clipper.cpp
   Extra-libraries:   stdc++

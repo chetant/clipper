@@ -66,13 +66,20 @@ extern "C" {
   typedef void * clipper;
 
   polygon polygon_new(int numPoints);
+  void polygon_clear(polygon poly);
+  int polygon_size(polygon poly);
   void polygon_addPoint(polygon poly, long64 x, long64 y);
+  long64 polygon_getPointX(polygon poly, int i);
+  long64 polygon_getPointY(polygon poly, int i);
   void polygon_free(polygon poly);
 
   int polygon_isClockwise(polygon poly, int useFullInt64Range);
   double polygon_getArea(polygon poly, int useFullInt64Range);
 
   polygons polygons_new(int numPolys);
+  void polygons_clear(polygons poly);
+  int polygons_size(polygons poly);
+  polygon polygons_getPoly(polygons polys, int i);
   void polygons_addPoly(polygons polys, polygon poly);
   void polygons_free(polygons poly);
 
