@@ -5,14 +5,13 @@ module Algebra.Clipper
 ,PolyType,ptSubject,ptClip
 ,PolyFillType,pftEvenOdd,pftNonZero
 ,IntPoint(..)
-,Polygon(..)
+,Polygon(..), getPoints
 ,Polygons(..)
-,(<++>)
 ,execute
-,intersection,(<@>)
-,union,(<+>)
-,difference,(<->)
-,Algebra.Clipper.xor,(<^>)
+,intersection
+,union
+,difference
+,Algebra.Clipper.xor
 ,polygonArea
 ,polygonIsClockwise
 ) where
@@ -56,6 +55,8 @@ data IntPoint = IntPoint
 newtype Polygon = Polygon [IntPoint] deriving Show
 type PolygonPtr = Ptr Polygon
 
+getPoints (Polygon ps) = ps
+
 instance Monoid Polygon where
     mempty = Polygon mempty
     mappend (Polygon x) (Polygon y) = Polygon (x `mappend` y)
@@ -95,8 +96,6 @@ instance Storable Polygons where
                              newForeignPtr polygonFree >>= 
                              flip withForeignPtr (setPoly poly)
               setPoly poly pptr = poke pptr poly >> polygonsAddPoly ptr pptr
-
-a <++> b = a `mappend` b
 
 -- struct ExPolygon {
 --   Polygon  outer;
@@ -152,16 +151,9 @@ execute cType sPolys cPolys = clipperNew >>=
             withForeignPtr rPtr peek
 
 intersection = execute ctIntersection
-a <@> b = a `intersection` b
-
 union = execute ctUnion
-a <+> b = a `union` b
-
 difference = execute ctDifference
-a <-> b = a `difference` b
-
 xor = execute ctXor
-a <^> b = a `Algebra.Clipper.xor` b
 
 --   long64 polygon_getPointX(polygon poly, int i);
 foreign import ccall "clipper.hpp polygon_getPointX"
