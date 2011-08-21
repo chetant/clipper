@@ -6,7 +6,7 @@ module Algebra.Clipper
 ,PolyFillType,pftEvenOdd,pftNonZero
 ,IntPoint(..)
 ,Polygon(..), getPoints
-,Polygons(..)
+,Polygons(..), getPolys
 ,execute
 ,intersection
 ,union
@@ -74,6 +74,8 @@ instance Storable Polygon where
 
 newtype Polygons = Polygons [Polygon] deriving Show
 type PolygonsPtr = Ptr Polygons
+
+getPolys (Polygons ps) = ps
 
 size (Polygon ps) = fromIntegral $ length ps
 sizes (Polygons ps) = fromIntegral $ length ps
