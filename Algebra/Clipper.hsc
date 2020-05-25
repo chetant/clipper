@@ -149,7 +149,9 @@ allocClipper = clipperNew >>= newForeignPtr clipperFree
 
 allocPolygons :: Polygons -> IO (ForeignPtr Polygons)
 allocPolygons polys =
-    polygonsNew (sizes polys) >>= newForeignPtr polygonsFree
+ do ptr <- newForeignPtr polygonsFree =<< polygonsNew (sizes polys)
+    withForeignPtr ptr (\p -> poke p polys)
+    return ptr
 
 execute' :: ForeignPtr Clipper
          -> ClipType
@@ -161,7 +163,8 @@ execute' clip cType sPolys cPolys =
   where
     exec_ cPtr =
       do sPtr <- newForeignPtr polygonsFree =<< polygonsNew (sizes sPolys) 
-         withForeignPtr sPtr (\s -> clipperAddPolygons cPtr s ptSubject)
+         withForeignPtr sPtr (\s -> do poke s sPolys
+                                       clipperAddPolygons cPtr s ptSubject)
          withForeignPtr cPolys (\c -> clipperAddPolygons cPtr c ptClip)
          rPtr <- newForeignPtr polygonsFree =<< polygonsNew 0
          withForeignPtr rPtr (\resPtr -> clipperExecutePolys cPtr cType resPtr) 
