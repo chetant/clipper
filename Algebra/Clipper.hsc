@@ -7,8 +7,9 @@ module Algebra.Clipper
 ,IntPoint(..)
 ,Polygon(..), getPoints
 ,Polygons(..), getPolys
+,Clipper
 ,allocClipper
-,allocPolygons
+,allocClip
 ,execute
 ,execute'
 ,intersection
@@ -147,25 +148,24 @@ polygonIsClockwise poly = do
 allocClipper :: IO (ForeignPtr Clipper)
 allocClipper = clipperNew >>= newForeignPtr clipperFree
 
-allocPolygons :: Polygons -> IO (ForeignPtr Polygons)
-allocPolygons polys =
+allocClip :: ForeignPtr Clipper -> Polygons -> IO ()
+allocClip clip polys =
  do ptr <- newForeignPtr polygonsFree =<< polygonsNew (sizes polys)
-    withForeignPtr ptr (\p -> poke p polys)
-    return ptr
+    withForeignPtr clip (\c -> 
+        withForeignPtr ptr (\p -> do poke p polys
+                                     clipperAddPolygons c p ptClip))
 
 execute' :: ForeignPtr Clipper
          -> ClipType
          -> Polygons
-         -> ForeignPtr Polygons
          -> IO Polygons
-execute' clip cType sPolys cPolys =
+execute' clip cType sPolys =
     withForeignPtr clip exec_
   where
     exec_ cPtr =
       do sPtr <- newForeignPtr polygonsFree =<< polygonsNew (sizes sPolys) 
          withForeignPtr sPtr (\s -> do poke s sPolys
                                        clipperAddPolygons cPtr s ptSubject)
-         withForeignPtr cPolys (\c -> clipperAddPolygons cPtr c ptClip)
          rPtr <- newForeignPtr polygonsFree =<< polygonsNew 0
          withForeignPtr rPtr (\resPtr -> clipperExecutePolys cPtr cType resPtr) 
          withForeignPtr rPtr peek
