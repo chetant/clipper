@@ -156,13 +156,13 @@ execute' :: ForeignPtr Clipper
          -> Polygons
          -> ForeignPtr Polygons
          -> IO Polygons
-execute' clip cType cPolys sPolys =
+execute' clip cType sPolys cPolys =
     withForeignPtr clip exec_
   where
     exec_ cPtr =
-      do clPtr <- newForeignPtr polygonsFree =<< polygonsNew (sizes cPolys) 
-         withForeignPtr clPtr (\c -> clipperAddPolygons cPtr c ptClip)
-         withForeignPtr sPolys (\s -> clipperAddPolygons cPtr s ptSubject)
+      do sPtr <- newForeignPtr polygonsFree =<< polygonsNew (sizes sPolys) 
+         withForeignPtr sPtr (\s -> clipperAddPolygons cPtr s ptSubject)
+         withForeignPtr cPolys (\c -> clipperAddPolygons cPtr c ptClip)
          rPtr <- newForeignPtr polygonsFree =<< polygonsNew 0
          withForeignPtr rPtr (\resPtr -> clipperExecutePolys cPtr cType resPtr) 
          withForeignPtr rPtr peek
