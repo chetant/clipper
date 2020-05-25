@@ -11,7 +11,7 @@ module Algebra.Clipper
 ,allocClipper
 ,allocClip
 ,execute
-,execute'
+,multiclip
 ,intersection
 ,union
 ,difference
@@ -155,20 +155,24 @@ allocClip clip polys =
         withForeignPtr ptr (\p -> do poke p polys
                                      clipperAddPolygons c p ptClip))
 
-execute' :: ForeignPtr Clipper
-         -> ClipType
-         -> Polygons
-         -> IO Polygons
-execute' clip cType sPolys =
-    withForeignPtr clip exec_
-  where
-    exec_ cPtr =
-      do sPtr <- newForeignPtr polygonsFree =<< polygonsNew (sizes sPolys) 
-         withForeignPtr sPtr (\s -> do poke s sPolys
-                                       clipperAddPolygons cPtr s ptSubject)
-         rPtr <- newForeignPtr polygonsFree =<< polygonsNew 0
-         withForeignPtr rPtr (\resPtr -> clipperExecutePolys cPtr cType resPtr) 
-         withForeignPtr rPtr peek
+multiclip :: ClipType
+          -> Polygons
+          -> Polygons
+          -> IO Polygons
+multiclip cType sPolys cPolys = clipperNew >>= 
+                              newForeignPtr clipperFree >>= 
+                              flip withForeignPtr exec_
+    where exec_ cPtr = do
+            spPtr <- polygonsNew (sizes sPolys) >>= newForeignPtr polygonsFree
+            cpPtr <- polygonsNew (sizes cPolys) >>= newForeignPtr polygonsFree
+            withForeignPtr spPtr (\subptr ->
+              do poke subptr sPolys
+                 withForeignPtr cpPtr (\clpptr ->
+                   do poke clpptr cPolys
+                      rPtr <- polygonsNew 0 >>= newForeignPtr polygonsFree
+                      withForeignPtr rPtr (\resPtr ->
+                        do clipperMultiClip cPtr cType clpptr resPtr subptr
+                           peek resPtr)))
 
 execute :: ClipType -> Polygons -> Polygons -> IO Polygons
 execute cType sPolys cPolys = clipperNew >>= 
@@ -265,6 +269,15 @@ foreign import ccall unsafe "clipper.hpp clipper_addPolygons"
 --   void clipper_executePoly(clipper c, ClipType ctype, polygons soln);
 foreign import ccall unsafe "clipper.hpp clipper_executePoly"
         clipperExecutePolys :: ClipperPtr -> ClipType -> PolygonsPtr -> IO ()
+
+--   void clipper_executePoly(clipper c, ClipType ctype, polygons soln);
+foreign import ccall unsafe "clipper.hpp clipper_multiclip"
+        clipperMultiClip :: ClipperPtr
+                         -> ClipType
+                         -> PolygonsPtr
+                         -> PolygonsPtr
+                         -> PolygonsPtr
+                         -> IO ()
 
 --   void clipper_free(clipper c);
 foreign import ccall unsafe "clipper.hpp &clipper_free"

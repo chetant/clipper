@@ -1062,6 +1062,26 @@ Clipper::~Clipper() //destructor
 };
 //------------------------------------------------------------------------------
 
+bool Clipper::MultiClip(int count, ClipType clipType,
+			   Polygons &solutions, const Polygons &clip, const Polygons &subjects,
+			   PolyFillType subjFillType,
+			   PolyFillType clipFillType) {
+	int i;
+	for(i = 0; i < count; i++) {
+		Polygons &result = *(new std::vector<Polygon>());
+		this->AddPolygons(clip, ptClip);
+		this->AddPolygon(subjects[i], ptSubject);
+		this->Execute(clipType, result, subjFillType, clipFillType);
+		this->Clear();
+		solutions.insert(
+      		solutions.end(),
+      		std::make_move_iterator(result.begin()),
+      		std::make_move_iterator(result.end())
+    	);
+	}
+}
+//----------------------------------------------------------------------------
+
 void Clipper::Clear()
 {
   if (m_edges.size() == 0) return; //avoids problems with ClipperBase destructor
@@ -3119,6 +3139,21 @@ extern "C" {
   // {
   //   ((Clipper *) c)->AddPolygons(*((ExPolygons *) poly));
   // }
+  
+  void clipper_multiclip(
+		  clipper c,
+		  int count,
+		  ClipType ctype,
+		  polygons clip,
+		  polygons solutions, 
+		  polygons subjects) {
+    ((Clipper *) c)->MultiClip(
+		count,
+		ctype,
+		*((Polygons *) solutions),
+		*((Polygons *) subjects),
+		*((Polygons *) clip) );
+  }
 
   void clipper_free(clipper c)
   {

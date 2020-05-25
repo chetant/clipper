@@ -88,6 +88,14 @@ extern "C" {
   void clipper_addPolygons(clipper c, polygons poly, PolyType ptype);
   void clipper_executePoly(clipper c, ClipType ctype, polygons soln);
   void clipper_free(clipper c);
+
+  void clipper_multiclip(
+		  clipper c,
+		  int count,
+		  ClipType ctype,
+		  polygons clip,
+		  polygons solutions,
+		  polygons subjects);
 }
 
 //used internally ...
@@ -215,6 +223,14 @@ public:
     ExPolygons &solution,
     PolyFillType subjFillType = pftEvenOdd,
     PolyFillType clipFillType = pftEvenOdd);
+  bool MultiClip(int count,
+	ClipType clipType,
+	Polygons &solution,
+	const Polygons &clip,
+	const Polygons &subjects,
+	PolyFillType subjFillType = pftEvenOdd,
+	PolyFillType clipFillType = pftEvenOdd);
+
   void Clear();
 protected:
   void Reset();
