@@ -1068,19 +1068,25 @@ bool Clipper::MultiClip(int count, ClipType clipType,
 			   PolyFillType clipFillType) {
 	int i;
 	fprintf(stderr, "Clipping %d polygons\n", count);
+	Polygons *clip_union = new std::vector<Polygon>;
+	this->AddPolygons(clip, ptSubject);
+	this->Execute(ctUnion, *clip_union, clipFillType);
+	this->Clear();
 	for(i = 0; i < count; i++) {
-		Polygons &result = *(new std::vector<Polygon>());
-		this->AddPolygons(clip, ptClip);
+		Polygons *result = new std::vector<Polygon>();
+		this->AddPolygons(*clip_union, ptClip);
 		this->AddPolygon(subjects[i], ptSubject);
-		this->Execute(clipType, result, subjFillType, clipFillType);
+		this->Execute(clipType, *result, subjFillType, clipFillType);
 		this->Clear();
-		fprintf(stderr, "clipped subject[%d], adding %ld polygons\n", i, result.size());
+		fprintf(stderr, "clipped subject[%d], adding %ld polygons\n", i, result->size());
 		solutions.insert(
       		solutions.end(),
-      		std::make_move_iterator(result.begin()),
-      		std::make_move_iterator(result.end())
+      		std::make_move_iterator(result->begin()),
+      		std::make_move_iterator(result->end())
     	);
+		delete result;
 	}
+	delete clip_union;
 }
 //----------------------------------------------------------------------------
 
