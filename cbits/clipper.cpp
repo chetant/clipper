@@ -3151,8 +3151,8 @@ extern "C" {
 		count,
 		ctype,
 		*((Polygons *) solutions),
-		*((Polygons *) subjects),
-		*((Polygons *) clip) );
+		*((Polygons *) clip),
+		*((Polygons *) subjects) );
   }
 
   void clipper_free(clipper c)

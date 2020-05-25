@@ -171,7 +171,7 @@ multiclip cType sPolys cPolys = clipperNew >>=
                    do poke clpptr cPolys
                       rPtr <- polygonsNew 0 >>= newForeignPtr polygonsFree
                       withForeignPtr rPtr (\resPtr ->
-                        do clipperMultiClip cPtr cType clpptr resPtr subptr
+                        do clipperMultiClip cPtr (sizes sPolys) cType clpptr resPtr subptr
                            peek resPtr)))
 
 execute :: ClipType -> Polygons -> Polygons -> IO Polygons
@@ -273,6 +273,7 @@ foreign import ccall unsafe "clipper.hpp clipper_executePoly"
 --   void clipper_executePoly(clipper c, ClipType ctype, polygons soln);
 foreign import ccall unsafe "clipper.hpp clipper_multiclip"
         clipperMultiClip :: ClipperPtr
+                         -> Int
                          -> ClipType
                          -> PolygonsPtr
                          -> PolygonsPtr
