@@ -1067,12 +1067,14 @@ bool Clipper::MultiClip(int count, ClipType clipType,
 			   PolyFillType subjFillType,
 			   PolyFillType clipFillType) {
 	int i;
+	fprintf(stderr, "Clipping %d polygons\n", count);
 	for(i = 0; i < count; i++) {
 		Polygons &result = *(new std::vector<Polygon>());
 		this->AddPolygons(clip, ptClip);
 		this->AddPolygon(subjects[i], ptSubject);
 		this->Execute(clipType, result, subjFillType, clipFillType);
 		this->Clear();
+		fprintf(stderr, "clipped subject[%d], adding %ld polygons\n", i, result.size());
 		solutions.insert(
       		solutions.end(),
       		std::make_move_iterator(result.begin()),
