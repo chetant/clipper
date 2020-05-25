@@ -7,7 +7,10 @@ module Algebra.Clipper
 ,IntPoint(..)
 ,Polygon(..), getPoints
 ,Polygons(..), getPolys
+,allocClipper
+,allocPolygons
 ,execute
+,execute'
 ,intersection
 ,union
 ,difference
@@ -140,6 +143,29 @@ polygonIsClockwise poly = do
   withForeignPtr fptr (flip poke poly)
   ret <- withForeignPtr fptr (flip polygonIsClockwise_ 0)
   if ret == 0 then return False else return True
+
+allocClipper :: IO (ForeignPtr Clipper)
+allocClipper = clipperNew >>= newForeignPtr clipperFree
+
+allocPolygons :: Polygons -> IO (ForeignPtr Polygons)
+allocPolygons polys =
+    polygonsNew (sizes polys) >>= newForeignPtr polygonsFree
+
+execute' :: ForeignPtr Clipper
+         -> ClipType
+         -> Polygons
+         -> ForeignPtr Polygons
+         -> IO Polygons
+execute' clip cType cPolys sPolys =
+    withForeignPtr clip exec_
+  where
+    exec_ cPtr =
+      do clPtr <- newForeignPtr polygonsFree =<< polygonsNew (sizes cPolys) 
+         withForeignPtr clPtr (\c -> clipperAddPolygons cPtr c ptClip)
+         withForeignPtr sPolys (\s -> clipperAddPolygons cPtr s ptSubject)
+         rPtr <- newForeignPtr polygonsFree =<< polygonsNew 0
+         withForeignPtr rPtr (\resPtr -> clipperExecutePolys cPtr cType resPtr) 
+         withForeignPtr rPtr peek
 
 execute :: ClipType -> Polygons -> Polygons -> IO Polygons
 execute cType sPolys cPolys = clipperNew >>= 
