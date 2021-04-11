@@ -1,7 +1,6 @@
 *~
 dist/
 dist-newstyle/
-*.local
 
 *.swp
 *.swo

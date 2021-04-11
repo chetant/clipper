@@ -1,0 +1,6 @@
+
+package *
+  gcc-location: g++
+
+program-locations
+  gcc-location: g++
