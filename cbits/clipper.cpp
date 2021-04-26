@@ -1085,6 +1085,7 @@ bool Clipper::MultiClip(int count, ClipType clipType,
 		delete result;
 	}
 	delete clip_union;
+	return true;
 }
 //----------------------------------------------------------------------------
 
